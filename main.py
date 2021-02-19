@@ -8,16 +8,17 @@ def move_player(player_rect, velocity, tiles):
         if velocity[0] > 0:
             player_rect.right = tiles[i].left
             res['right'] = True
-        else: # velocity[0] < 0
+        elif velocity[0] < 0:
             player_rect.left = tiles[i].right
             res['left'] = True
+    
     player_rect.y += velocity[1]
     collisions = player_rect.collidelistall(tiles)
     for i in collisions:
         if velocity[1] > 0:
             player_rect.bottom = tiles[i].top
             res['down'] = True
-        else: # velocity[1] < 0
+        elif velocity[1] < 0:
             player_rect.top = tiles[i].bottom
             res['up'] = True
             
@@ -25,27 +26,27 @@ def move_player(player_rect, velocity, tiles):
 
 pygame.init()
 
+game_map = [ ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'], 
+             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '0', '0', '0', '0', '0', '0', '1', '1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
+             ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1'] ]
 
 TILE_SIZE = 50
 STEP = 2
 
-print(['0' for i in range(8)])
+WIN_SIZE_X, WIN_SIZE_Y = TILE_SIZE * len(game_map[0]), TILE_SIZE * len(game_map) # TILE_SIZE * 12, TILE_SIZE * 11
 
-game_map = [ ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1'], 
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '0', '0', '0', '0', '0', '0', '0', '0', '1'],
-             ['1', '1', '1', '1', '1', '1', '1', '1', '1', '1'] ]
 
 
 clock = pygame.time.Clock()
-screen = pygame.display.set_mode((TILE_SIZE * len(game_map[0]), TILE_SIZE * len(game_map)))
+screen = pygame.display.set_mode((WIN_SIZE_X, WIN_SIZE_Y))
 
 
 running = True
@@ -66,9 +67,12 @@ player_rect = pygame.Rect(50, 100, player_surf.get_width(), player_surf.get_heig
 
 
 player_velocity = [0, 0]
-player_acceleration = [0., 0.]
+
+# scroll = [0, 0]
 
 while running:
+    
+    screen.fill((200, 200, 200))
     
     tiles = []
     
@@ -79,47 +83,52 @@ while running:
             if event.key == pygame.K_ESCAPE:
                 running = False
             if event.key == pygame.K_RIGHT:
-                player_acceleration[0] += 1.
+                player_velocity[0] += 3
             if event.key == pygame.K_LEFT:
-                player_acceleration[0] -= 1.
+                player_velocity[0] -= 3
             if event.key == pygame.K_UP:
-                player_acceleration[1] -= 1.
-            if event.key == pygame.K_DOWN:
-                player_acceleration[1] += 1.
-    
+                player_velocity[1] -= 5
     
     for i in range(len(game_map)):
         for j in range(len(game_map[0])):
+            x_coord, y_coord = j * TILE_SIZE, i * TILE_SIZE
             if game_map[i][j] == '1':
-                screen.blit(wall, (j * TILE_SIZE, i * TILE_SIZE))
-                tiles.append(pygame.Rect(j * TILE_SIZE, i * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+                screen.blit(wall, (x_coord, y_coord))
+                tiles.append(pygame.Rect(x_coord, y_coord, TILE_SIZE, TILE_SIZE))
             elif game_map[i][j] == '0':
-                screen.blit(back, (j * TILE_SIZE, i * TILE_SIZE))
-              
-    collision = move_player(player_rect, player_velocity, tiles)
+                screen.blit(back, (x_coord, y_coord))
+    
+#     scroll[0] -= player_rect.x
+#     scroll[1] -= player_rect.y
+    
+    collision = move_player(player_rect, list(map(round, player_velocity)), tiles)
+    
+#     scroll[0] += player_rect.x
+#     scroll[1] += player_rect.y
     
     if collision['down']:
-        player_acceleration[1] = 0
-        player_velocity[1] = 0
+        player_velocity[0] *= 0.85
     else:
-        player_acceleration[1] += 0.09
+        player_velocity[0] *= 0.99
+
+    player_velocity[1] += 0.8
+    
+    if collision['down']:
+        player_velocity[1] = 0
     if collision['up']:
-        player_acceleration[1] = 0
         player_velocity[1] = 0
     if collision['left']:
-        player_acceleration[0] = 0
         player_velocity[0] = 0
     if collision['right']:
-        player_acceleration[0] = 0
         player_velocity[0] = 0
         
-    player_velocity = [int(round(player_velocity[i] + player_acceleration[i])) for i in range(2)]
-    player_acceleration[0] =  -0.49999999999999*player_velocity[0]
-
     
+
     screen.blit(player_surf, player_rect)
     pygame.display.flip()
     clock.tick(60)
+    print(f'Velocity: {player_velocity}')
+#     print('scroll: ', scroll)
     
 pygame.display.quit()
 pygame.quit()
