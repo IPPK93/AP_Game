@@ -19,6 +19,9 @@ class LiveObject(GameObject):
         self.physics = Physics()
         self.velocity = self.physics.velocity
     
+    def update(self):
+        self.physics.update()
+        
     def set_transparent_color(self, color):
         self.surf.set_colorkey(color)
         self.rect = self.surf.get_rect()
@@ -50,11 +53,40 @@ class LiveObject(GameObject):
         self.physics.collides = res
 
 class Enemy(LiveObject):
-    def __init__(self, image, size, hp, damage, mp, action_radius, init_items = []):
+    def __init__(self, image, size, hp, damage, mp, init_items = []):
         super().__init__(image, size, hp, damage, mp, init_items)
-        self.act_radius = action_radius
-    
-    
+        self.cur_direction = 'right'
+        
+    def move(self, obstacles):
+        self.ai_move()
+        super().move(obstacles)
+        
+    def ai_move(self):
+        if self.physics.collides['right']:
+            self.cur_direction = 'left'
+        if self.physics.collides['left']:
+            self.cur_direction = 'right'
+        if self.cur_direction == 'left':
+            self.velocity[0] -= self.physics.friction_coeff
+        else:
+            self.velocity[0] += self.physics.friction_coeff
+            
+        
+class Player(LiveObject):
+    def __init__(self, image, size, hp, damage, mp, init_items = []):
+        super().__init__(image, size, hp, damage, mp, init_items)
+        
+    def move(self, obstacles):
+        pressed = pygame.key.get_pressed()
+        if pressed[pygame.K_UP]:
+            self.velocity[1] -= self.physics.force
+        if pressed[pygame.K_RIGHT]:
+            self.velocity[0] += self.physics.force
+        if pressed[pygame.K_LEFT]:
+            self.velocity[0] -= self.physics.force
+        
+        super().move(obstacles)
+
 class LifelessObject(GameObject):
     def __init__(self, image, destructibility):
         super().__init__(image, size)
@@ -67,19 +99,4 @@ class Block(LifelessObject):
 
 class GameItem(LifelessObject):
     def __init__(self, image, size):
-        super().__init__(image, size, False)
-        
-class Player(LiveObject):
-    def __init__(self, image, size, hp, damage, mp, init_items = []):
-        super().__init__(image, size, hp, damage, mp, init_items)
-        
-    def move(self, tiles):
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_UP]:
-            self.velocity[1] -= self.physics.force
-        if pressed[pygame.K_RIGHT]:
-            self.velocity[0] += self.physics.force
-        if pressed[pygame.K_LEFT]:
-            self.velocity[0] -= self.physics.force
-        
-        super().move(tiles)
+        super().__init__(image, size, False)        
