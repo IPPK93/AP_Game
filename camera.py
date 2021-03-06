@@ -1,22 +1,21 @@
+import pygame
+
 # size = (width, height)
 # offset = (offset_w, offset_h)
 class Camera():
     def __init__(self, size, offset):
-        self.width, self.height = size
+        self.rect = pygame.Rect((0, 0), size)
         self.offset_w, self.offset_h = offset
-        self.x, self.y = (0, 0)
         
-    def update(self, player_rect):
+    def update(self, obj_rect):
         dx, dy = 0, 0
-        if self.width - self.offset_w < player_rect.right:
-            dx = player_rect.right - (self.width - self.offset_w)
-        if self.offset_w > player_rect.left:
-            dx = player_rect.left - self.offset_w
-        if self.offset_h > player_rect.top:
-            dy = player_rect.top - self.offset_h
-        if self.height - self.offset_h < player_rect.bottom:
-            dy = player_rect.bottom - (self.height - self.offset_h)
-        self.x += dx
-        self.y += dy
-        player_rect.x -= dx
-        player_rect.y -= dy
+        if self.rect.x + self.rect.width - self.offset_w < obj_rect.right:
+            dx = obj_rect.right - (self.rect.x + self.rect.width - self.offset_w)
+        if self.rect.x + self.offset_w > obj_rect.left:
+            dx = obj_rect.left - (self.rect.x + self.offset_w)
+        if self.rect.y + self.offset_h > obj_rect.top:
+            dy = obj_rect.top - (self.rect.y + self.offset_h)
+        if self.rect.y + self.rect.height - self.offset_h < obj_rect.bottom:
+            dy = obj_rect.bottom - (self.rect.y + self.rect.height - self.offset_h)
+        self.rect.x += dx
+        self.rect.y += dy
