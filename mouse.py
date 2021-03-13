@@ -12,8 +12,8 @@ class Mouse():
         else:
             self.pos = (-10000, -10000)
         
-    def collides(self, group):
+    def collides(self, *group):
         self.collisions = []
         for elem in group:
-            if elem.collidepoint(self.pos):
+            if elem.rect.collidepoint(self.pos):
                 self.collisions.append(elem)
