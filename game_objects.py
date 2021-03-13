@@ -26,11 +26,13 @@ class LiveObject(GameObject):
         self.surf.set_colorkey(color)
         self.rect = self.surf.get_rect()
     
-    def move(self, obstacles):
+    def move(self, *group):
         res = {'up' : False, 'down' : False, 'left' : False, 'right' : False}
         velocity = tuple(map(round, self.physics.velocity))
+        obstacles = list(map(lambda obj: obj.rect, group))
         
         self.rect.x += velocity[0]
+        
         collisions = self.rect.collidelistall(obstacles)
         for i in collisions:
             if velocity[0] > 0:
@@ -57,10 +59,10 @@ class Enemy(LiveObject):
         super().__init__(image, size, hp, damage, mp, init_items)
         self.cur_direction = 'right'
         
-    def move(self, obstacles):
+    def move(self, *obstacles):
+        super().move(*obstacles)
         self.ai_move()
-        super().move(obstacles)
-        
+
     def ai_move(self):
         if self.physics.collides['right']:
             self.cur_direction = 'left'
@@ -76,7 +78,7 @@ class Player(LiveObject):
     def __init__(self, image, size, hp, damage, mp, init_items = []):
         super().__init__(image, size, hp, damage, mp, init_items)
         
-    def move(self, obstacles):
+    def move(self, *obstacles):
         pressed = pygame.key.get_pressed()
         if pressed[pygame.K_UP]:
             self.velocity[1] -= self.physics.force
@@ -85,10 +87,10 @@ class Player(LiveObject):
         if pressed[pygame.K_LEFT]:
             self.velocity[0] -= self.physics.force
         
-        super().move(obstacles)
+        super().move(*obstacles)
 
 class LifelessObject(GameObject):
-    def __init__(self, image, destructibility):
+    def __init__(self, image, size, destructibility):
         super().__init__(image, size)
         self.destructible = destructibility
         
@@ -97,6 +99,15 @@ class Block(LifelessObject):
         super().__init__(image, size, destructibility)
         
 
+class StaticBlock(Block):
+    def __init__(self, size, image = 'temp_block.png'):
+        super().__init__(image, size, False)
+        
+    def get_moved_block(self, *position):
+        new_block = StaticBlock((self.width, self.height), self.image)
+        new_block.rect = new_block.rect.move(*position)
+        return new_block
+        
 class GameItem(LifelessObject):
     def __init__(self, image, size):
         super().__init__(image, size, False)        
