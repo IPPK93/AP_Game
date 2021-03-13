@@ -2,11 +2,6 @@ from camera import *
 from mouse import *
 import pygame
 
-
-# need to draw static map
-# all changes should be tracked
-# do not redraw static map on the same level
-
 class Field():
     def __init__(self, surface, blocks, block_size, player):
         self.screen = surface
@@ -26,21 +21,21 @@ class Field():
         
         self.fill_dynamic_map()
         
+        self.player.move(*self.tiles, *self.enemies)
+        self.player.update()        
+        
         for enemy in self.enemies:
-            enemy.move(self.tiles)
+            enemy.move(self.player, *self.tiles)
             enemy.update()
         
-        self.player.move(self.tiles)
-        self.player.update()
-
         self.mouse.update(self.camera.rect.topleft)
-        self.camera.update(self.player.rect)
+        self.camera.update(self.player)
         
         # for testing mouse position
-        self.mouse.collides(self.tiles)
+        self.mouse.collides(*self.tiles)
+        
         for elem in self.mouse.collisions:
             pygame.draw.rect(self.dynamic_map, (200, 200, 0), elem)
-        
         
         self.screen.blit(self.dynamic_map, (0, 0),  self.camera.rect)
 
@@ -64,8 +59,9 @@ class Field():
                 x_coord, y_coord = j * self.block_size, i * self.block_size
                 cur_block = self.blocks.get(self.map[i][j])
                 if cur_block is not None: # check if block is static
-                    self.static_map.blit(cur_block, (x_coord, y_coord))
-                    self.tiles.append(pygame.Rect(x_coord, y_coord, self.block_size, self.block_size))    
+                    self.static_map.blit(cur_block.surf, (x_coord, y_coord))
+                    self.tiles.append(cur_block.get_moved_block(x_coord, y_coord))  
+            
     
     def load_map(self, map_path):
         with open(map_path) as f:
