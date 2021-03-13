@@ -5,16 +5,16 @@ import pygame
 
 pygame.init()
 
-TILE_SIZE = 60
+TILE_SIZE = 48
 
 WIN_SIZE = (800, 600)
 OFFSET = (50, 50)
 
-wall = pygame.Surface((TILE_SIZE, TILE_SIZE))
-wall.fill((200, 0, 0))
-wall_rect = wall.get_rect()
+# wall = pygame.Surface((TILE_SIZE, TILE_SIZE))
+# wall.fill((200, 0, 0))
+# wall_rect = wall.get_rect()
 
-field = Field(pygame.display.set_mode(WIN_SIZE), {'w' : wall}, TILE_SIZE, Player('player.png', (TILE_SIZE//2, TILE_SIZE//2), 100, 0, 100))
+field = Field(pygame.display.set_mode(WIN_SIZE), {'w' : StaticBlock((TILE_SIZE, TILE_SIZE))}, TILE_SIZE, Player('player.png', (TILE_SIZE//2, TILE_SIZE//2), 100, 0, 100))
 field.load_map('maps/01.txt')
 
 field.player.set_transparent_color((255, 255, 255))
