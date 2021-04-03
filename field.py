@@ -5,7 +5,7 @@ import pygame
 class Field():
     def __init__(self, surface, blocks, block_size, player):
         self.screen = surface
-        self.camera = Camera((surface.get_width(), surface.get_height()), (block_size, block_size))
+        self.camera = Camera((surface.get_width(), surface.get_height()), (4 * block_size, 2 * block_size))
         self.mouse = Mouse()
         self.player = player
         self.enemies = []
