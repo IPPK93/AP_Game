@@ -1,13 +1,14 @@
 from game_object import GameObject
 from copy import copy
+from constants import Constant
 
 class LifelessObject(GameObject):
-    def __init__(self, image, size, destructibility):
+    def __init__(self, image, size = Constant.DEFAULT_SIZE, destructibility = False):
         super().__init__(image, size)
         self.destructible = destructibility
 
 class Block(LifelessObject):
-    def __init__(self, image, size, destructibility):
+    def __init__(self, image, size = Constant.DEFAULT_SIZE, destructibility = False):
         super().__init__(image, size, destructibility)
         
     def get_moved_block(self, *position):
@@ -16,11 +17,12 @@ class Block(LifelessObject):
         return new_block
 
 class StaticBlock(Block):
-    def __init__(self, size, image = 'temp_block.png'):
+    def __init__(self, image, size = Constant.DEFAULT_SIZE):
         super().__init__(image, size, False)
+        self.surf.set_colorkey('white')
         
 class DynamicBlock(Block):
-    def __init__(self, size, destructibility, move_limit = 100, image = 'temp_block_2.png'):
+    def __init__(self, image, size = Constant.DEFAULT_SIZE, destructibility = False, move_limit = Constant.MOVE_LIMIT):
         super().__init__(image, size, destructibility)
         self.move_counter = 0
         self.move_limit = move_limit

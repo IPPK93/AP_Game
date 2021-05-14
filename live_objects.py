@@ -2,19 +2,20 @@ import pygame
 from physics import *
 from game_object import GameObject
 from lifeless_objects import *
-
+from constants import Constant
 
 class LiveObject(GameObject):
-    def __init__(self, image, size, hp, damage, mp, physics = Physics()):
-        super().__init__(image, size)
-        self.hp = hp
-        self.damage = damage
-        self.mp = mp
+    def __init__(self, image, size = Constant.DEFAULT_SIZE, init_pos = (0, 0), physics = Physics()):
+        super().__init__(image, size, init_pos)
         self.physics = physics
+        self.image_direction = 1
     
     def update(self):
         self.physics.update()
         
+        if self.image_direction * self.physics.x_vel < 0:
+            self.surf = pygame.transform.flip(self.surf, True, False)
+            self.image_direction *= -1
     
     def move(self, *group):
         res = {'up' : False, 'down' : False, 'left' : False, 'right' : False}
@@ -46,8 +47,10 @@ class LiveObject(GameObject):
         setattr(self.physics, 'collides', res)
 
 class Enemy(LiveObject):
-    def __init__(self, image, size, hp, damage, mp, physics = Physics1(init_velocity = [1, 0], applied_force = 1)):
-        super().__init__(image, size, hp, damage, mp, physics)
+    def __init__(self, image, size = Constant.DEFAULT_SIZE, init_pos = (0, 0), physics = None):
+        if physics is None:
+            physics = Physics1(init_velocity = [1, 0], applied_force = 1)
+        super().__init__(image, size, init_pos, physics)
         
     def move(self, *obstacles):
         super().move(*obstacles)
@@ -58,19 +61,22 @@ class Enemy(LiveObject):
 
         
 class Player(LiveObject):
-    def __init__(self, image, size, hp, damage, mp, physics = Physics()):
-        super().__init__(image, size, hp, damage, mp, physics)
+    def __init__(self, image, size = Constant.PLAYER_SIZE, init_pos = (0, 0), physics = Physics()):
+        super().__init__(image, size, init_pos, physics)
+        self.air_time = 0
         
     def move(self, *obstacles):
         pressed = pygame.key.get_pressed()
+            
         direction = complex(pressed[pygame.K_RIGHT] - pressed[pygame.K_LEFT], -pressed[pygame.K_UP])
+
         self.physics.apply_force(direction)
         
         super().move(*obstacles)
 
 class NoGravityGuy(Enemy):
-    def __init__(self, image, size, hp, damage, mp, physics = Physics(0, 0, 0, init_velocity = [5, 0])):
-        super().__init__(image, size, hp, damage, mp, physics)
+    def __init__(self, image, size = Constant.DEFAULT_SIZE, init_pos = (0, 0), physics = Physics(0, 0, 0, init_velocity = [5, 0])):
+        super().__init__(image, size, init_pos, physics)
         self.step_counter = 0
         self.step_limit = 48 * 5
         self.cur_direction = 'right'
@@ -91,9 +97,11 @@ class NoGravityGuy(Enemy):
             self.step_counter = 0
         
 class MovingGuy(Enemy):
-    def __init__(self, image, size, hp, damage, mp, target, physics = Physics(applied_force = 0.1, gravity = 0, friction_coeff = 0)):
-        super().__init__(image, size, hp, damage, mp, physics)
-        self.act_radius_sqr = (48 * 10) ** 2
+    def __init__(self, image, size = Constant.DEFAULT_SIZE, init_pos = (0, 0), target = None, physics = None):
+        if physics is None:
+            physics = Physics(applied_force = 0.1, gravity = 0, friction_coeff = 0)
+        super().__init__(image, size, init_pos, physics)
+        self.act_radius_sqr = Constant.DEFAULT_ACT_RADIUS ** 2
         self.target = target
         
     def ai_move(self):

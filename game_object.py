@@ -1,12 +1,13 @@
 import pygame
+from constants import Constant
 
 class GameObject():
-    def __init__(self, image, size):
+    def __init__(self, image, size = Constant.DEFAULT_SIZE, init_pos = (0, 0)):
         self.image = image
         self.width, self.height = size
         self.surf = pygame.image.load(image).convert_alpha()
         self.surf = pygame.transform.scale(self.surf, size)
-        self.rect = self.surf.get_rect()
+        self.rect = self.surf.get_rect(topleft = init_pos)
 
     @property
     def right(self):
