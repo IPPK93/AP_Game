@@ -21,7 +21,7 @@ class StaticBlock(Block):
         
 class DynamicBlock(Block):
     def __init__(self, size, destructibility, move_limit = 100, image = 'temp_block_2.png'):
-        super().__init__(size, destructibility, image)
+        super().__init__(image, size, destructibility)
         self.move_counter = 0
         self.move_limit = move_limit
         self.move_right = True
