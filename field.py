@@ -1,5 +1,6 @@
 from camera import *
 from mouse import *
+from lifeless_objects import *
 import pygame
 
 class Field():
@@ -11,22 +12,24 @@ class Field():
         self.enemies = []
         self.blocks = blocks
         self.block_size = block_size
-        self.dyn_obj = {'player': [self.player], 'enemies': self.enemies}
+        self.dyn_obj = {'player': [self.player], 'enemies': self.enemies, 'blocks' : []}
         self.map = []
         self.tiles = [] 
         self.static_map = None
         self.dynamic_map = None
 
     def update(self):
-        
         self.fill_dynamic_map()
         
         self.player.move(*self.tiles, *self.enemies)
-        self.player.update()        
+        self.player.update()
         
         for enemy in self.enemies:
             enemy.move(self.player, *self.tiles)
             enemy.update()
+        
+        for block in self.dyn_obj['blocks']:
+            block.move()
         
         self.mouse.update(self.camera.rect.topleft)
         self.camera.update(self.player)
@@ -39,7 +42,7 @@ class Field():
         
         self.screen.blit(self.dynamic_map, (0, 0),  self.camera.rect)
 
-        pygame.display.flip()    
+        pygame.display.flip()
         
         self.screen.fill((200, 200, 200))
 
@@ -58,9 +61,14 @@ class Field():
             for j in range(len(self.map[0])):
                 x_coord, y_coord = j * self.block_size, i * self.block_size
                 cur_block = self.blocks.get(self.map[i][j])
-                if cur_block is not None: # check if block is static
-                    self.static_map.blit(cur_block.surf, (x_coord, y_coord))
-                    self.tiles.append(cur_block.get_moved_block(x_coord, y_coord))  
+                if isinstance(cur_block, Block):
+                    cur_block = cur_block.get_moved_block(x_coord, y_coord)
+                    if isinstance(cur_block, StaticBlock): # check if block is static
+                        self.static_map.blit(cur_block.surf, (x_coord, y_coord))
+                        self.tiles.append(cur_block)
+                    elif isinstance(cur_block, DynamicBlock):
+                        self.dyn_obj['blocks'].append(cur_block)
+                        self.tiles.append(cur_block)
             
     
     def load_map(self, map_path):
