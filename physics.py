@@ -180,7 +180,7 @@ class Physics1(Physics):
         super().__init__(applied_force, gravity, friction_coeff, air_friction_coeff, init_velocity)
     
     def collide_react(self, axis_index):
-        if axis == 1:
+        if axis_index == 1:
             super().collide_react(axis_index)
         else:
             self._velocity[axis_index] = copysign(1, self._velocity[axis_index]) * (-self._force)        
