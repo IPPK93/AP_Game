@@ -5,20 +5,16 @@ from lifeless_objects import *
 
 
 class LiveObject(GameObject):
-    def __init__(self, image, size, hp, damage, mp, init_items = [], physics = Physics()):
+    def __init__(self, image, size, hp, damage, mp, physics = Physics()):
         super().__init__(image, size)
         self.hp = hp
         self.damage = damage
         self.mp = mp
-        self.items = init_items
         self.physics = physics
     
     def update(self):
         self.physics.update()
         
-#     def set_transparent_color(self, color):
-#         self.surf.set_colorkey(color)
-#         self.rect = self.surf.get_rect()
     
     def move(self, *group):
         res = {'up' : False, 'down' : False, 'left' : False, 'right' : False}
@@ -40,8 +36,6 @@ class LiveObject(GameObject):
         self.y += velocity[1]
         collisions = self.rect.collidelistall(obstacles)
         for i in collisions:
-            if isinstance(i, DynamicBlock):
-                i.react_func()
             if velocity[1] > 0:
                 self.bottom = obstacles[i].top
                 res['down'] = True
@@ -52,8 +46,8 @@ class LiveObject(GameObject):
         setattr(self.physics, 'collides', res)
 
 class Enemy(LiveObject):
-    def __init__(self, image, size, hp, damage, mp, init_items = [], physics = Physics1(init_velocity = [1, 0], applied_force = 1)):
-        super().__init__(image, size, hp, damage, mp, init_items, physics)
+    def __init__(self, image, size, hp, damage, mp, physics = Physics1(init_velocity = [1, 0], applied_force = 1)):
+        super().__init__(image, size, hp, damage, mp, physics)
         
     def move(self, *obstacles):
         super().move(*obstacles)
@@ -64,8 +58,8 @@ class Enemy(LiveObject):
 
         
 class Player(LiveObject):
-    def __init__(self, image, size, hp, damage, mp, init_items = [], physics = Physics()):
-        super().__init__(image, size, hp, damage, mp, init_items, physics)
+    def __init__(self, image, size, hp, damage, mp, physics = Physics()):
+        super().__init__(image, size, hp, damage, mp, physics)
         
     def move(self, *obstacles):
         pressed = pygame.key.get_pressed()
@@ -75,8 +69,8 @@ class Player(LiveObject):
         super().move(*obstacles)
 
 class NoGravityGuy(Enemy):
-    def __init__(self, image, size, hp, damage, mp, init_items = [], physics = Physics(0, 0, 0, init_velocity = [5, 0])):
-        super().__init__(image, size, hp, damage, mp, init_items, physics)
+    def __init__(self, image, size, hp, damage, mp, physics = Physics(0, 0, 0, init_velocity = [5, 0])):
+        super().__init__(image, size, hp, damage, mp, physics)
         self.step_counter = 0
         self.step_limit = 48 * 5
         self.cur_direction = 'right'
@@ -97,8 +91,8 @@ class NoGravityGuy(Enemy):
             self.step_counter = 0
         
 class MovingGuy(Enemy):
-    def __init__(self, image, size, hp, damage, mp, target, init_items = [], physics = Physics(applied_force = 0.1, gravity = 0, friction_coeff = 0)):
-        super().__init__(image, size, hp, damage, mp, init_items, physics)
+    def __init__(self, image, size, hp, damage, mp, target, physics = Physics(applied_force = 0.1, gravity = 0, friction_coeff = 0)):
+        super().__init__(image, size, hp, damage, mp, physics)
         self.act_radius_sqr = (48 * 10) ** 2
         self.target = target
         
